@@ -1,6 +1,6 @@
-from my_random import RandomVariable, choice
-from my_collections import SortedQueue
-from cprint import cprint, BColors
+from .my_random import RandomVariable, choice
+from .my_collections import SortedQueue
+from .cprint import cprint, BColors
 
 
 class Event:

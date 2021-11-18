@@ -1,4 +1,4 @@
-from simulation import HarborSimulation
+from utils.simulation import HarborSimulation
 from logging import Logger
 from statistics import mean
 import argparse, os
