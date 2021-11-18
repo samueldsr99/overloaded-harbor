@@ -1,16 +1,20 @@
 from utils.simulation import HarborSimulation
-from logging import Logger
 from statistics import mean
-import argparse, os
+import argparse
+from utils.cprint import cprint, BColors
 
 
 def main(args):
     elapsed = []
-    for _ in range(args.tries):
-        print("Starting a new harbor simulation", 'Main  ')
-        harbor = HarborSimulation(args.amount, args.docks)
+    for i in range(args.repetitions):
+        if args.verbosity:
+            cprint(BColors.BOLD, '*' * 50)
+            cprint(BColors.BOLD, f'Harbor Simulation {i + 1}')
+            cprint(BColors.BOLD, '*' * 50)
+
+        harbor = HarborSimulation(args.ships, args.docks, args.verbosity)
         harbor.loop()
-        elapsed.extend([harbor.elapsed(i) / 60 for i in range(args.amount)])
+        elapsed.extend([harbor.elapsed(i) / 60 for i in range(args.ships)])
 
     ev = mean(elapsed)
     print(f"The mean of the ships turn around time is {ev} hours", 'Main  ')
@@ -18,12 +22,11 @@ def main(args):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Harbor simulator')
-    parser.add_argument('-d', '--docks', type=int, default=3, help='number of harbor docks')
-    parser.add_argument('-a', '--amount', type=int, default=3, help='number of ships to attend')
-    parser.add_argument('-t', '--tries', type=int, default=10, help='number of harbor simulations')
-    parser.add_argument('-l', '--level', type=str, default='INFO', help='log level')
-    parser.add_argument('-F', '--file', type=bool, const=True, nargs='?', help='write the log in a file')
+    parser = argparse.ArgumentParser(description='Overloaded Harbor Simulation')
+    parser.add_argument('-s', '--ships', type=int, default=3, help='Number of ships')
+    parser.add_argument('-d', '--docks', type=int, default=3, help='Number of docks in the harbor')
+    parser.add_argument('-r', '--repetitions', type=int, default=10, help='Number of simulations')
+    parser.add_argument('-v', '--verbosity', type=int, default=1, help='Verbosity level (0 disabled, 1 enabled)')
 
     args = parser.parse_args()
     return args
@@ -31,11 +34,5 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
-    if args.file:
-        os.makedirs("./logs/", exist_ok=True)
-    log = Logger(name='Harbor-Logguer')
-    log.setLevel(args.level)
 
     ev = main(args)
-    if args.file: 
-        print(ev)
