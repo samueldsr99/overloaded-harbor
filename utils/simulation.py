@@ -48,27 +48,39 @@ class HarborSimulation:
         self.arrivals = [0] * n
         self.departures = [0] * n
 
-        self.exp = RandomVariable("exp")
-        self.normal = RandomVariable("normal")
+        self.exp = RandomVariable('exp')
+        self.normal = RandomVariable('normal')
 
         self.verbose = verbose
 
-    def time_forward(self, ntime):
-        self.time = max(self.time, ntime)
-
-    def print(self, color, msg):
+    def _print(self, color, msg):
         '''
         Print if self.verbose=True
         '''
         if (self.verbose):
            cprint(color, msg) 
 
+    def info(self, id, msg):
+        '''
+        Print info message for ship id
+        '''
+        self._print(BColors.OKGREEN, f'{id}: {msg}')
+
+    def error(self, id, msg):
+        '''
+        Print error message
+        '''
+        self._print(BColors.FAIL, f'{id}: {msg}')
+
+    def time_forward(self, ntime):
+        self.time = max(self.time, ntime)
+
     def do_arrival(self):
         '''
         Generate a new arrival
         '''
         if self.s_counter < self.n:
-            self.print(BColors.OKBLUE, f"Generating the arrival time of ship number {self.s_counter}")
+            self.info(self.s_counter, f'Generating arrival')
             time = self.time + self.exp(self.ARRIVAL_TIME_LAMBDA) * 60
             e = Event(time, self.s_counter, self.enqueue)
             self.s_counter += 1
@@ -83,7 +95,7 @@ class HarborSimulation:
         self.size[e.id] = choice(self.SHIP_SIZE_PROB)
         self.arrivals[e.id] = e.time
         self.time_forward(e.time)
-        self.print(BColors.OKBLUE, f'Ship number {e.id} arrive to the port')
+        self.info(e.id, f'Arrive to the port')
         self.events.append(Event(self.time, e.id, self.move))
         
         return self.do_arrival()
@@ -93,10 +105,10 @@ class HarborSimulation:
         Move a ship to a dock
         '''
         if (self.docks == 0) or self.tugboat_blocked:
-            self.print(BColors.FAIL, f'Imposible to move ship number {e.id} at this moment')
+            self.error(e.id, f'Tugboat is blocked or there is no docks')
             return False
         self.update_tugboat_state(1)
-        self.print(BColors.OKBLUE, f'Ship number {e.id} is being moved to a dock')
+        self.info(e.id, f'Moving to a dock')
         self.tugboat_blocked = True
         time = self.time + self.exp(self.TUGBOAT_MOVE_SHIP_TIME_LAMBDA) * 60
         self.events.append(Event(time, e.id, self.dock))
@@ -107,10 +119,11 @@ class HarborSimulation:
         '''
         Start load the cargo of a ship
         '''
-        self.print(BColors.OKBLUE, f'Ship number {e.id} is loading its cargo')
+        self.info(e.id, f'Loading cargo')
         self.time_forward(e.time)
         self.docks -= 1
         self.tugboat_blocked = False
+        self.info('TUGBOAT', 'Free')
         time = self.load_time(self.size[e.id])
         self.events.append(Event(time, e.id, self.ready))
 
@@ -121,7 +134,7 @@ class HarborSimulation:
         Finish to load the ship cargo
         and wait for it's departure
         '''
-        self.print(BColors.OKBLUE, f'Ship number {e.id} is already loaded')
+        self.info(e.id, f'Loaded')
         self.time_forward(e.time)
         self.events.append(Event(self.time, e.id, self.do_departure))
 
@@ -132,9 +145,9 @@ class HarborSimulation:
         Move a ship out of the docks
         '''
         if self.tugboat_blocked:
-            self.print(BColors.FAIL, f'Tugboat is bussy, ship number {e.id} stay at dock')
+            self.error(e.id, f'Tugboat is bussy, should wait at dock')
             return False
-        self.print(BColors.OKBLUE, f'Ship number {e.id} is being moved back to the port')
+        self.info(e.id, f'Moving back to the port')
         self.update_tugboat_state(0)
         self.docks += 1
         self.tugboat_blocked = True
@@ -147,7 +160,7 @@ class HarborSimulation:
         '''
         Finish to service a ship
         '''
-        self.print(BColors.OKBLUE, f'Ship number {e.id} is leaving the harbor')
+        self.info(e.id, f'Leaving the harbor')
         self.tugboat_blocked = False
         self.time_forward(e.time)
         self.departures[e.id] = self.time
@@ -161,8 +174,8 @@ class HarborSimulation:
         0 implies the docks.
         '''
         if nstate != self.tugboat_state:
-            name = ['docks', 'port'][nstate]
-            self.print(BColors.OKBLUE, f'Moving the tugboat to the {name}')
+            location = 'port' if nstate else 'dock'
+            self.info('TUGBOAT', f'Moving to {location}')
             self.time += self.exp(self.TUGBOAT_MOVE_TIME_LAMBDA)
         self.tugboat_state = 1 - nstate
 
@@ -189,5 +202,5 @@ class HarborSimulation:
                     self.events.pop(i)
                     break
 
-        self.print(BColors.OKBLUE, 'FINISHED')
+        self.info('---', 'FINISHED')
 
