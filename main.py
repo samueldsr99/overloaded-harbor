@@ -16,9 +16,8 @@ def main(args):
         harbor.loop()
         elapsed.extend([harbor.elapsed(i) / 60 for i in range(args.ships)])
 
-    ev = mean(elapsed)
-    print(f"The mean of the ships turn around time is {ev} hours", 'Main  ')
-    return ev
+    m = mean(elapsed)
+    cprint(BColors.OKGREEN, f'\n\nmean turn around time is {m}')
 
 
 def parse_args():
@@ -34,5 +33,5 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
+    main(args)
 
-    ev = main(args)
