@@ -2,7 +2,7 @@
 
 ## Proyecto de Simulación
 
-* `Samuel David Suárez Rodríguez C-411`
+* `Samuel David Suárez Rodríguez C-412`
 
 ## Ejecutar
 
