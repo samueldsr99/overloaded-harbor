@@ -47,6 +47,8 @@ class HarborSimulation:
         self.size = [0] * n
         self.arrivals = [0] * n
         self.departures = [0] * n
+        self.dock_arrivals = [0] * n
+        self.dock_departures = [0] * n
 
         self.exp = RandomVariable('exp')
         self.normal = RandomVariable('normal')
@@ -121,6 +123,7 @@ class HarborSimulation:
         '''
         self.info(e.id, f'Loading cargo')
         self.time_forward(e.time)
+        self.dock_arrivals[e.id] = e.time
         self.docks -= 1
         self.tugboat_blocked = False
         self.info('TUGBOAT', 'Free')
@@ -164,6 +167,7 @@ class HarborSimulation:
         self.tugboat_blocked = False
         self.time_forward(e.time)
         self.departures[e.id] = self.time
+        self.dock_departures[e.id] = e.time
         
         return True          
 
@@ -186,11 +190,17 @@ class HarborSimulation:
         u, o = self.SHIP_CARGO_TIME_PARAMS[id]
         return self.time + self.normal(u, o) * 60
 
-    def elapsed(self, id):
+    def time_in_harbor(self, id):
         '''
-        Get the time elapsed for ship id
+        Get the time elapsed in harbor for ship id
         '''
         return self.departures[id] - self.arrivals[id]
+
+    def time_in_dock(self, id):
+        '''
+        Get the time elapsed in dock for ship id
+        '''
+        return self.dock_departures[id] - self.dock_arrivals[id]
 
     def loop(self):
         self.do_arrival()
