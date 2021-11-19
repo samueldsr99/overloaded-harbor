@@ -5,7 +5,9 @@ from utils.cprint import cprint, BColors
 
 
 def main(args):
-    elapsed = []
+    time_in_harbor = []
+    time_in_dock = []
+
     for i in range(args.repetitions):
         if args.verbosity:
             cprint(BColors.BOLD, '*' * 50)
@@ -14,10 +16,13 @@ def main(args):
 
         harbor = HarborSimulation(args.ships, args.docks, args.verbosity)
         harbor.loop()
-        elapsed.extend([harbor.elapsed(i) / 60 for i in range(args.ships)])
+        time_in_harbor.extend([harbor.time_in_harbor(i) / 60 for i in range(args.ships)])
+        time_in_dock.extend([harbor.time_in_dock(i) / 60 for i in range(args.ships)])
 
-    m = mean(elapsed)
-    cprint(BColors.OKGREEN, f'\n\nmean turn around time is {m}')
+    mh = mean(time_in_harbor)
+    md = mean(time_in_dock)
+    cprint(BColors.OKGREEN, f'\n\nMean time in harbor {mh}')
+    cprint(BColors.OKGREEN, f'Mean time in dock {md}')
 
 
 def parse_args():
