@@ -83,7 +83,7 @@ de estado.
 Para simular el hilo de cada servidor(muelle) establecimos un flujo cada vez
 que un barco llega a este, determinado como:
 
-- LLegar
+- Llegar
 - Encolar el barco
 - Trasladarse hasta el muelle
 - Cargar
