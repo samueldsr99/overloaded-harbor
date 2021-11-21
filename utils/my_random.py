@@ -25,13 +25,13 @@ class RandomVariable:
     def _exp(self, lambda_):
         return -(1 / lambda_) * math.log(random())
 
-    def _normal(self, u, o):
+    def _normal(self, x, y):
         while(True):
             y1 = self._exp(1)
             y2 = self._exp(1)
             v = y2 - (((y1 - 1) ** 2) / 2)
             if v > 0:
-                return u + y1 * (o ** 0.5)
+                return x + y1 * (y ** 0.5)
 
 
 def choice(prob_arr):
